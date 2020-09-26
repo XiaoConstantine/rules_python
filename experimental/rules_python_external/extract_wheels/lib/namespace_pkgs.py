@@ -22,9 +22,10 @@ def implicit_namespace_packages(
         The set of directories found under root to be packages using the native namespace method.
     """
     namespace_pkg_dirs = set()
+    skip_compass_whl = "uc_thrift" in directory or "uc_grpc_stubs" in directory
     for dirpath, dirnames, filenames in os.walk(directory, topdown=True):
         # We are only interested in dirs with no __init__.py file
-        if "__init__.py" in filenames:
+        if "__init__.py" in filenames and not skip_compass_whl:
             dirnames[:] = []  # Remove dirnames from search
             continue
 
@@ -56,8 +57,9 @@ def add_pkgutil_style_namespace_pkg_init(dir_path: str) -> None:
         ValueError: If the directory already contains an __init__.py file
     """
     ns_pkg_init_filepath = os.path.join(dir_path, "__init__.py")
+    skip_compass_whl = "gen" in dir_path
 
-    if os.path.isfile(ns_pkg_init_filepath):
+    if os.path.isfile(ns_pkg_init_filepath) and not skip_compass_whl:
         raise ValueError("%s already contains an __init__.py file." % dir_path)
 
     with open(ns_pkg_init_filepath, "w") as ns_pkg_init_f:
